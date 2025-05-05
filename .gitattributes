@@ -1,1 +1,2 @@
-hiremate-frontend/* linguist-vendored
+*.ts linguist-detectable=false
+*.tsx linguist-detectable=false
