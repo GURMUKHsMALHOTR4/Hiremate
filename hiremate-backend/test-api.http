@@ -1,0 +1,144 @@
+### =============================
+### 👤 USER MANAGEMENT
+### =============================
+
+### Register a new user
+POST http://localhost:8081/users/register
+Content-Type: application/json
+
+{
+  "username": "gurmukh127",
+  "password": "pass123",
+  "email": "gurmukh1235@example.com"
+}
+
+### Try registering with same username (should fail)
+POST http://localhost:8081/users/register
+Content-Type: application/json
+
+{
+  "username": "gurmukh127",
+  "password": "anotherpass",
+  "email": "another@example.com"
+}
+
+### Register another user (employer)
+POST http://localhost:8081/users/register
+Content-Type: application/json
+
+{
+  "username": "employer1",
+  "password": "emp123",
+  "email": "employer1@example.com"
+}
+
+### Login with valid credentials
+POST http://localhost:8081/users/login
+Content-Type: application/json
+
+{
+  "username": "gurmukh127",
+  "password": "pass123"
+}
+
+### Login with invalid password
+POST http://localhost:8081/users/login
+Content-Type: application/json
+
+{
+  "username": "gurmukh127",
+  "password": "wrongpass"
+}
+
+### Get all users (for testing)
+GET http://localhost:8081/users/all
+
+### Get user by ID (e.g. 1)
+GET http://localhost:8081/users/1
+
+
+### =============================
+### 💼 JOB MANAGEMENT
+### =============================
+
+### Create a new job (employerId should be a valid user ID)
+POST http://localhost:8081/jobs/create
+Content-Type: application/json
+
+{
+  "title": "Backend Developer",
+  "description": "Responsible for building and maintaining backend systems.",
+  "location": "Bangalore",
+  "company": "TechCorp",
+  "salary": "90000",
+  "employerId": 2
+}
+
+### Create another job
+POST http://localhost:8081/jobs/create
+Content-Type: application/json
+
+{
+  "title": "Software Engineer",
+  "description": "Develop and maintain software applications.",
+  "location": "Remote",
+  "company": "TechCorp",
+  "salary": "95000",
+  "employerId": 2
+}
+
+### Get all jobs
+GET http://localhost:8081/jobs/all
+
+### Get job by ID (change ID based on existing job)
+GET http://localhost:8081/jobs/1
+
+### Update a job (update ID as needed)
+PUT http://localhost:8081/jobs/update/1
+Content-Type: application/json
+
+{
+  "title": "Senior Backend Developer",
+  "description": "Handles backend architecture, optimization, and APIs.",
+  "location": "Remote",
+  "company": "TechCorp",
+  "salary": "120000"
+}
+
+### Delete a job (update ID)
+DELETE http://localhost:8081/jobs/delete/1
+
+### Search jobs by title (e.g., "Backend Developer")
+GET http://localhost:8081/jobs/search?title=Backend%20Developer
+
+
+### =============================
+### 📄 JOB APPLICATIONS
+### =============================
+
+### Apply to a job
+POST http://localhost:8081/applications/apply
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "jobId": 2
+}
+
+### Apply to job with invalid user ID (test validation)
+POST http://localhost:8081/applications/apply
+Content-Type: application/json
+
+{
+  "userId": 999,
+  "jobId": 2
+}
+
+### Get all applications
+GET http://localhost:8081/applications/all
+
+### Get applications by user ID
+GET http://localhost:8081/applications/byUser/1
+
+### Get applications by job ID
+GET http://localhost:8081/applications/byJob/2
