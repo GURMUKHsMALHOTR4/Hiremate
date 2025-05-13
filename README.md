@@ -30,3 +30,20 @@ Hiremate is a full-stack job recruitment platform that reimagines how hiring sho
 | Auth      | JWT + Role-based Authentication   |
 | API Test  | Postman                           |
 ---
+---
+
+## 🔧 Backend – API & Database
+
+### 🗃️ PostgreSQL Tables
+![PostgreSQL Table List](screenshots/postgresql-tables.png)
+
+### 🧱 Table Schemas
+
+#### `users`
+![Users Table Schema](screenshots/users-schema.png)
+
+#### `jobs`
+![Jobs Table Schema](screenshots/jobs-schema.png)
+
+#### `applications`
+![Applications Table Schema](screenshots/applications-schema.png)
