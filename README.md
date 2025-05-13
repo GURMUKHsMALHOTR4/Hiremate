@@ -60,6 +60,7 @@ Hiremate is a full-stack job recruitment platform that reimagines how hiring sho
 ---
 
 ## 🌐 Live Product Preview
+![WhatsApp Image 2025-05-13 at 04 34 29](https://github.com/user-attachments/assets/d14d8dfb-be57-45c4-8da3-a4e66e3392b1)
 <img width="1470" alt="Screenshot 2025-05-13 at 3 56 58 AM" src="https://github.com/user-attachments/assets/a4abf682-6ceb-4e04-a8ec-f86c03913582" />
 <img width="1461" alt="Screenshot 2025-05-13 at 3 57 18 AM" src="https://github.com/user-attachments/assets/4c48218f-0d07-4bda-9e14-d6d77f007654" />
 <img width="1470" alt="Screenshot 2025-05-13 at 3 57 28 AM" src="https://github.com/user-attachments/assets/a2c260ef-57e1-449e-8158-a9c48ec46a51" />
