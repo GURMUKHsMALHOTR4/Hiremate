@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // ✅ Enable CORS for frontend
+    // ✅ Enable CORS
     @Override
     public void addCorsMappings(CorsRegistry registry) {
 
@@ -23,10 +23,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        String uploadPath =
-                System.getProperty("user.dir") + "/uploads/";
-
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath);
+                .addResourceLocations(
+                        "file:uploads/",
+                        "file:./uploads/",
+                        "file:/opt/render/project/src/uploads/"
+                );
     }
 }
