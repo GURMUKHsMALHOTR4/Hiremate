@@ -51,8 +51,11 @@ public class SecurityConfig {
                         "/api/auth/**"
                 ).permitAll()
 
-                .requestMatchers("/uploads/resumes/**")
-                .permitAll()
+                // ✅ PUBLIC FILE ACCESS
+                .requestMatchers(
+                        "/uploads/**",
+                        "/uploads/resumes/**"
+                ).permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/api/jobs/**")
                 .permitAll()
