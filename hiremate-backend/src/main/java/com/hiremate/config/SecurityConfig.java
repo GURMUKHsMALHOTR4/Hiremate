@@ -31,54 +31,68 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            org.springframework.security.config.annotation.web.builders.HttpSecurity http
+    ) throws Exception {
 
         http
-            .cors().configurationSource(corsConfigurationSource())
-            .and()
-            .csrf().disable()
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+
             .authorizeHttpRequests(auth -> auth
 
-                // ✅ Public routes
+                // ✅ PUBLIC ROUTES
                 .requestMatchers(
                         "/",
+                        "/swagger-ui.html",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
-                        "/swagger-ui.html"
+                        "/v3/api-docs",
+                        "/api/auth/**"
                 ).permitAll()
 
-                .requestMatchers("/uploads/resumes/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/uploads/resumes/**")
+                .permitAll()
 
-                .requestMatchers(HttpMethod.GET, "/api/jobs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/jobs/**")
+                .permitAll()
 
-                .requestMatchers(HttpMethod.POST, "/api/jobs/create").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/jobs/create")
+                .permitAll()
 
-                .requestMatchers(HttpMethod.POST, "/api/applications/apply").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/applications/apply")
+                .authenticated()
 
-                // ✅ Everything else secured
-                .anyRequest().authenticated()
+                // ✅ EVERYTHING ELSE SECURED
+                .anyRequest()
+                .authenticated()
             )
 
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
             .authenticationProvider(authenticationProvider())
 
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return PasswordEncoderFactories
+                .createDelegatingPasswordEncoder();
     }
 
     @Bean
@@ -86,9 +100,8 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://hiremate-frontend.vercel.app"
+        config.setAllowedOriginPatterns(List.of(
+                "*"
         ));
 
         config.setAllowedMethods(List.of(
@@ -100,11 +113,10 @@ public class SecurityConfig {
         ));
 
         config.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type"
+                "*"
         ));
 
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
