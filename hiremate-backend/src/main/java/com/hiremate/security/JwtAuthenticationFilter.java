@@ -32,8 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // ✅ VERY IMPORTANT
-        // Skip JWT check for uploaded resumes
+        // ✅ ALLOW RESUME FILES WITHOUT JWT
         if (path.startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
             return;
@@ -63,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     customUserDetailsService.loadUserByUsername(username);
 
-            if (jwtToken != null && jwtUtil.validateToken(jwtToken)) {
+            if (jwtUtil.validateToken(jwtToken)) {
 
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
