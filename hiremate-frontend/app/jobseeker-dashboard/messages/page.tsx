@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Send, X } from "lucide-react";
 import BackButton from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
@@ -28,9 +27,8 @@ interface Message {
 }
 
 export default function JobSeekerMessagesPage() {
-  const router = useRouter();
-
   const { toast } = useToast();
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -47,10 +45,6 @@ export default function JobSeekerMessagesPage() {
       ? Number(localStorage.getItem("hiremate_userId"))
       : 0;
 
-  // ✅ Removed search params completely to fix Vercel build issue
-  const recruiterId = null;
-  const recruiterUsername = null;
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -61,39 +55,40 @@ export default function JobSeekerMessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  const fetchMessages = (
+  const fetchMessages = async (
     peerId: number,
     reset = false
   ) => {
-    fetch(
-      `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
-        reset ? 0 : page
-      }&size=20`,
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    )
-      .then((r) => r.json())
-      .then((msgs: Message[]) => {
-        if (msgs.length === 0) {
-          setHasMore(false);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
+          reset ? 0 : page
+        }&size=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
         }
-
-        setMessages((prev) =>
-          reset
-            ? msgs.reverse()
-            : [...msgs.reverse(), ...prev]
-        );
-      })
-      .catch((err) =>
-        toast({
-          title: "Error",
-          description: err.message,
-          variant: "destructive",
-        })
       );
+
+      const msgs: Message[] = await response.json();
+
+      if (msgs.length === 0) {
+        setHasMore(false);
+      }
+
+      setMessages((prev) =>
+        reset
+          ? msgs.reverse()
+          : [...msgs.reverse(), ...prev]
+      );
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const openChat = (conv: Conversation) => {
@@ -113,90 +108,75 @@ export default function JobSeekerMessagesPage() {
     fetchMessages(selected.userId);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!selected || !newMsg.trim()) return;
 
-    const payload = {
-      text: newMsg,
-    };
-
-    fetch(
-      `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    )
-      .then((r) => {
-        if (!r.ok) {
-          throw new Error("Send failed");
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({
+            text: newMsg,
+          }),
         }
-
-        return r.json();
-      })
-      .then((msg: Message) => {
-        setMessages((prev) => [...prev, msg]);
-        setNewMsg("");
-      })
-      .catch((err) =>
-        toast({
-          title: "Error",
-          description: err.message,
-          variant: "destructive",
-        })
       );
+
+      if (!response.ok) {
+        throw new Error("Send failed");
+      }
+
+      const msg: Message = await response.json();
+
+      setMessages((prev) => [...prev, msg]);
+
+      setNewMsg("");
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/messages/conversations`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
-      .then((r) => r.json())
-      .then((data: Conversation[]) => {
+    const loadConversations = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/messages/conversations`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
+        );
+
+        const data: Conversation[] =
+          await response.json();
+
         setConversations(data);
         setFiltered(data);
-
-        if (recruiterId && recruiterUsername) {
-          const existing = data.find(
-            (c) => c.userId === recruiterId
-          );
-
-          if (existing) {
-            openChat(existing);
-          } else {
-            const placeholder = {
-              userId: recruiterId,
-              username: recruiterUsername,
-              lastMessage: "",
-              updatedAt: "",
-            };
-
-            setSelected(placeholder);
-            setMessages([]);
-            setHasMore(true);
-
-            fetchMessages(recruiterId, true);
-          }
-        }
-      })
-      .catch((err) =>
+      } catch (err: any) {
         toast({
           title: "Error",
           description: err.message,
           variant: "destructive",
-        })
-      );
-  }, [toast]);
+        });
+      }
+    };
+
+    loadConversations();
+  }, []);
 
   useEffect(() => {
     if (!search) {
-      return setFiltered(conversations);
+      setFiltered(conversations);
+      return;
     }
 
     const q = search.toLowerCase();
@@ -322,15 +302,16 @@ export default function JobSeekerMessagesPage() {
 
               <div className="border-t p-4 flex gap-2">
                 <Input
-                  placeholder="Type a message…"
+                  placeholder="Type a message..."
                   value={newMsg}
                   onChange={(e) =>
                     setNewMsg(e.target.value)
                   }
-                  onKeyDown={(e) =>
-                    e.key === "Enter" &&
-                    sendMessage()
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
+                  }}
                   className="flex-1"
                 />
 
