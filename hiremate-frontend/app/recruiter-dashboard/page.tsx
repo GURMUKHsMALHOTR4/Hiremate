@@ -330,13 +330,20 @@ setHasNewNotifications(activeJobIds.length > 0);
                               <span>@{a.username} ({a.email})</span>
                              {a.resumeFilename && (
   <button
-    onClick={() =>
-      window.open(
-        `${API_BASE_URL}/uploads/resumes/${a.resumeFilename}`,
-        "_blank",
-        "noopener,noreferrer"
-      )
-    }
+    onClick={() => {
+      const url =
+        `${API_BASE_URL}/uploads/resumes/${a.resumeFilename}`;
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }}
     className="hover:text-primary"
   >
     <Download className="w-5 h-5" />
