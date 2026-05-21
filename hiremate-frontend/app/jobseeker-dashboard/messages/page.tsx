@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Send, X } from "lucide-react";
 import BackButton from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,12 @@ interface Message {
 
 export default function JobSeekerMessagesPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null;
+
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -42,8 +47,8 @@ export default function JobSeekerMessagesPage() {
   const [hasMore, setHasMore] = useState(true);
 
   const currentUserId = Number(localStorage.getItem("hiremate_userId"));
-  const recruiterId = Number(searchParams.get("recruiterId"));
-  const recruiterUsername = searchParams.get("recruiterUsername");
+  const recruiterId = Number(searchParams?.get("recruiterId"));
+  const recruiterUsername = searchParams?.get("recruiterUsername");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,16 +59,27 @@ export default function JobSeekerMessagesPage() {
   }, [messages]);
 
   const fetchMessages = (peerId: number, reset = false) => {
-    fetch(`${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${reset ? 0 : page}&size=20`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    })
+    fetch(
+      `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
+        reset ? 0 : page
+      }&size=20`,
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    )
       .then((r) => r.json())
       .then((msgs: Message[]) => {
         if (msgs.length === 0) setHasMore(false);
-        setMessages((prev) => (reset ? msgs.reverse() : [...msgs.reverse(), ...prev]));
+        setMessages((prev) =>
+          reset ? msgs.reverse() : [...msgs.reverse(), ...prev]
+        );
       })
       .catch((err) =>
-        toast({ title: "Error", description: err.message, variant: "destructive" })
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
       );
   };
 
@@ -83,15 +99,20 @@ export default function JobSeekerMessagesPage() {
 
   const sendMessage = () => {
     if (!selected || !newMsg.trim()) return;
+
     const payload = { text: newMsg };
-    fetch(`${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify(payload),
-    })
+
+    fetch(
+      `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    )
       .then((r) => {
         if (!r.ok) throw new Error("Send failed");
         return r.json();
@@ -101,7 +122,11 @@ export default function JobSeekerMessagesPage() {
         setNewMsg("");
       })
       .catch((err) =>
-        toast({ title: "Error", description: err.message, variant: "destructive" })
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
       );
   };
 
@@ -116,6 +141,7 @@ export default function JobSeekerMessagesPage() {
 
         if (recruiterId && recruiterUsername) {
           const existing = data.find((c) => c.userId === recruiterId);
+
           if (existing) {
             openChat(existing);
           } else {
@@ -125,6 +151,7 @@ export default function JobSeekerMessagesPage() {
               lastMessage: "",
               updatedAt: "",
             };
+
             setSelected(placeholder);
             setMessages([]);
             setHasMore(true);
@@ -133,16 +160,24 @@ export default function JobSeekerMessagesPage() {
         }
       })
       .catch((err) =>
-        toast({ title: "Error", description: err.message, variant: "destructive" })
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
       );
-  }, [toast, searchParams]);
+  }, [toast]);
 
   useEffect(() => {
     if (!search) return setFiltered(conversations);
+
     const q = search.toLowerCase();
+
     setFiltered(
-      conversations.filter((c) =>
-        c.username.toLowerCase().includes(q) || String(c.userId).startsWith(q)
+      conversations.filter(
+        (c) =>
+          c.username.toLowerCase().includes(q) ||
+          String(c.userId).startsWith(q)
       )
     );
   }, [search, conversations]);
@@ -162,24 +197,34 @@ export default function JobSeekerMessagesPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="mb-4"
           />
+
           <div className="flex-1 overflow-y-auto">
             {filtered.map((conv) => (
               <button
                 key={conv.userId}
                 onClick={() => openChat(conv)}
                 className={`w-full text-left p-3 rounded mb-2 ${
-                  selected?.userId === conv.userId ? "bg-primary/10" : "hover:bg-muted"
+                  selected?.userId === conv.userId
+                    ? "bg-primary/10"
+                    : "hover:bg-muted"
                 }`}
               >
                 <div className="font-medium">@{conv.username}</div>
-                <div className="text-xs text-muted-foreground line-clamp-1">{conv.lastMessage}</div>
+
+                <div className="text-xs text-muted-foreground line-clamp-1">
+                  {conv.lastMessage}
+                </div>
+
                 <div className="text-2xs text-muted-foreground mt-1">
                   {new Date(conv.updatedAt).toLocaleString()}
                 </div>
               </button>
             ))}
+
             {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground mt-4">No conversations found.</p>
+              <p className="text-sm text-muted-foreground mt-4">
+                No conversations found.
+              </p>
             )}
           </div>
         </div>
@@ -192,7 +237,10 @@ export default function JobSeekerMessagesPage() {
           ) : (
             <>
               <div className="flex items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold">Chat with @{selected.username}</h2>
+                <h2 className="text-lg font-semibold">
+                  Chat with @{selected.username}
+                </h2>
+
                 <button onClick={() => setSelected(null)}>
                   <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
                 </button>
@@ -201,11 +249,16 @@ export default function JobSeekerMessagesPage() {
               <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
                 {hasMore && (
                   <div className="text-center">
-                    <Button variant="outline" onClick={loadOlder} className="mb-4">
+                    <Button
+                      variant="outline"
+                      onClick={loadOlder}
+                      className="mb-4"
+                    >
                       Load older messages
                     </Button>
                   </div>
                 )}
+
                 {messages.map((m) => (
                   <div
                     key={m.id}
@@ -216,11 +269,13 @@ export default function JobSeekerMessagesPage() {
                     }`}
                   >
                     {m.text}
+
                     <div className="text-2xs text-muted-foreground text-right mt-1">
                       {new Date(m.sentAt).toLocaleTimeString()}
                     </div>
                   </div>
                 ))}
+
                 <div ref={messagesEndRef} />
               </div>
 
@@ -229,10 +284,17 @@ export default function JobSeekerMessagesPage() {
                   placeholder="Type a message…"
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && sendMessage()
+                  }
                   className="flex-1"
                 />
-                <Button size="icon" onClick={sendMessage} disabled={!newMsg.trim()}>
+
+                <Button
+                  size="icon"
+                  onClick={sendMessage}
+                  disabled={!newMsg.trim()}
+                >
                   <Send className="w-5 h-5" />
                 </Button>
               </div>
