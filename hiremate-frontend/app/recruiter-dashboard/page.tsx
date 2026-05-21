@@ -328,11 +328,20 @@ setHasNewNotifications(activeJobIds.length > 0);
                           <li key={a.applicationId} className="border p-3 rounded">
                             <div className="flex justify-between items-center">
                               <span>@{a.username} ({a.email})</span>
-                              {a.resumeFilename && (
-                                <a href={`${API_BASE_URL}/uploads/resumes/${a.resumeFilename}`} download target="_blank" rel="noopener" className="hover:text-primary">
-                                  <Download className="w-5 h-5" />
-                                </a>
-                              )}
+                             {a.resumeFilename && (
+  <button
+    onClick={() =>
+      window.open(
+        `${API_BASE_URL}/uploads/resumes/${a.resumeFilename}`,
+        "_blank",
+        "noopener,noreferrer"
+      )
+    }
+    className="hover:text-primary"
+  >
+    <Download className="w-5 h-5" />
+  </button>
+)}
                             </div>
                             <div className="mt-3 flex gap-3">
                               {a.status === "PENDING" ? (
