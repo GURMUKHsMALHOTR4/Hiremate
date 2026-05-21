@@ -1,7 +1,7 @@
 package com.hiremate.config;
 
-import com.hiremate.security.JwtAuthenticationFilter;
 import com.hiremate.security.CustomAuthenticationProvider;
+import com.hiremate.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,17 +52,18 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // ✅ PUBLIC FILE ACCESS
-                .requestMatchers(
-                        "/uploads/**",
-                        "/uploads/resumes/**"
-                ).permitAll()
+                .requestMatchers("/uploads/**")
+                .permitAll()
 
+                // ✅ PUBLIC JOB ROUTES
                 .requestMatchers(HttpMethod.GET, "/api/jobs/**")
                 .permitAll()
 
+                // ✅ JOB CREATION
                 .requestMatchers(HttpMethod.POST, "/api/jobs/create")
                 .permitAll()
 
+                // ✅ APPLICATION SUBMIT
                 .requestMatchers(HttpMethod.POST, "/api/applications/apply")
                 .authenticated()
 
@@ -89,11 +90,13 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config
     ) throws Exception {
+
         return config.getAuthenticationManager();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return PasswordEncoderFactories
                 .createDelegatingPasswordEncoder();
     }
@@ -103,9 +106,7 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of(
-                "*"
-        ));
+        config.setAllowedOriginPatterns(List.of("*"));
 
         config.setAllowedMethods(List.of(
                 "GET",
@@ -115,9 +116,7 @@ public class SecurityConfig {
                 "OPTIONS"
         ));
 
-        config.setAllowedHeaders(List.of(
-                "*"
-        ));
+        config.setAllowedHeaders(List.of("*"));
 
         config.setAllowCredentials(false);
 
