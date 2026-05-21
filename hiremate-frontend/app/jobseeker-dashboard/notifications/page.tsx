@@ -10,7 +10,7 @@ interface Notification {
   status: "PENDING" | "ACCEPTED" | "REJECTED"
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hiremate-backend-zaoc.onrender.com"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])

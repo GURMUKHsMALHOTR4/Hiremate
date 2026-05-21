@@ -52,7 +52,7 @@ export default function PostJobPage() {
         },
       }
 
-      const response = await fetch("http://localhost:8080/api/jobs/create", {
+      const response = await fetch("https://hiremate-backend-zaoc.onrender.com/api/jobs/create", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

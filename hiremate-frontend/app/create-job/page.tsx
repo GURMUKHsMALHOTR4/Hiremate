@@ -47,7 +47,7 @@ export default function CreateJobPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/api/jobs/create", {
+      const res = await fetch("https://hiremate-backend-zaoc.onrender.com/api/jobs/create", {
         method: "POST",
         headers: getAuthHeader(), // ✅ uses token + content-type
         body: JSON.stringify({ ...form, employerId }),

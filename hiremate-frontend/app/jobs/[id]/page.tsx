@@ -47,13 +47,13 @@ export default function JobDetailPage() {
 
     const fetchJob = async () => {
       try {
-        const res = await fetchWithAuth(`http://localhost:8080/api/jobs/${id}`)
+        const res = await fetchWithAuth(`https://hiremate-backend-zaoc.onrender.com/api/jobs/${id}`)
         if (!res.ok) throw new Error("Failed to fetch job")
         const data = await res.json()
         setJob(data)
 
         // ✅ Only get jobIds for PENDING or ACCEPTED apps (backend handles it now)
-        const checkRes = await fetchWithAuth(`http://localhost:8080/api/applications/jobIdsByUser`)
+        const checkRes = await fetchWithAuth(`https://hiremate-backend-zaoc.onrender.com/api/applications/jobIdsByUser`)
         const jobIds = await checkRes.json()
         if (Array.isArray(jobIds) && jobIds.includes(Number(id))) {
           setApplied(true)
@@ -99,7 +99,7 @@ export default function JobDetailPage() {
     formData.append("resume", resumeFile)
 
     try {
-      const res = await fetch("http://localhost:8080/api/applications/apply", {
+      const res = await fetch("https://hiremate-backend-zaoc.onrender.com/api/applications/apply", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { getToken } from "@/lib/auth-service"
 import BackButton from "@/components/common/BackButton"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hiremate-backend-zaoc.onrender.com"
 
 export default function PostJobPage() {
   const router = useRouter()

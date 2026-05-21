@@ -12,7 +12,7 @@ interface LoginData {
   password: string;
 }
 
-const API_URL = "http://localhost:8080";
+const API_URL = "https://hiremate-backend-zaoc.onrender.com";
 
 // ✅ Register a new user with detailed error handling
 export async function registerUser(data: RegisterData): Promise<boolean> {

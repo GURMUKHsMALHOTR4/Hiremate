@@ -12,7 +12,7 @@ import { getToken } from "@/lib/auth-service";
 import { useToast } from "@/hooks/use-toast";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_API_URL || "https://hiremate-backend-zaoc.onrender.com";
 
 interface Conversation {
   userId: number;

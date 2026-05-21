@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import BackButton from "@/components/common/BackButton";
 import { Download, X, MessageSquare } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hiremate-backend-zaoc.onrender.com";
 
 export default function RecruiterDashboard() {
   const [hasNewNotifications, setHasNewNotifications] = useState(false);

@@ -28,8 +28,8 @@ export default function JobListingsPage() {
     try {
       setIsLoading(true)
       const endpoint = query
-        ? `http://localhost:8080/jobs/search?title=${encodeURIComponent(query)}`
-        : "http://localhost:8080/jobs/all"
+        ? `https://hiremate-backend-zaoc.onrender.com/jobs/search?title=${encodeURIComponent(query)}`
+        : "https://hiremate-backend-zaoc.onrender.com/jobs/all"
 
       const res = await fetchWithAuth(endpoint)
       if (!res.ok) {
@@ -50,7 +50,7 @@ export default function JobListingsPage() {
 
   const fetchAppliedJobIds = async (userId: number) => {
     try {
-      const res = await fetchWithAuth(`http://localhost:8080/api/applications/jobIdsByUser/${userId}`)
+      const res = await fetchWithAuth(`https://hiremate-backend-zaoc.onrender.com/api/applications/jobIdsByUser/${userId}`)
       if (!res.ok) throw new Error("Failed to fetch applied job IDs")
       const ids = await res.json()
       setAppliedJobIds(ids)

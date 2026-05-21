@@ -30,7 +30,7 @@ export default function EditJobPage() {
 
     console.log("Editing Job ID:", jobId)
 
-    fetch(`http://localhost:8080/api/jobs/${jobId}`, {
+    fetch(`https://hiremate-backend-zaoc.onrender.com/api/jobs/${jobId}`, {
       method: "GET",
       headers: getAuthHeader(),
       credentials: "include",
@@ -68,7 +68,7 @@ export default function EditJobPage() {
     e.preventDefault()
 
     try {
-      const res = await fetch(`http://localhost:8080/api/jobs/update/${jobId}`, {
+      const res = await fetch(`https://hiremate-backend-zaoc.onrender.com/api/jobs/update/${jobId}`, {
         method: "PUT",
         headers: {
           ...getAuthHeader(),

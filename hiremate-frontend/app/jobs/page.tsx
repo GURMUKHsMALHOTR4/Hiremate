@@ -23,7 +23,7 @@ export default function JobsPage() {
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const response = await fetch("http://localhost:8080/jobs/all")
+        const response = await fetch("https://hiremate-backend-zaoc.onrender.com/jobs/all")
         if (!response.ok) {
           throw new Error("Failed to fetch jobs")
         }
