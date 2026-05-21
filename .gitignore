@@ -1,0 +1,13 @@
+# Node/Next.js
+node_modules/
+.next/
+.env
+.DS_Store
+
+# Java (Spring Boot)
+target/
+*.log
+*.class
+
+# Uploaded resumes
+hiremate-backend/uploads/resumes/
