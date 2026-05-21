@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { getToken } from "@/lib/auth-service";
 import { useToast } from "@/hooks/use-toast";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 interface Conversation {
   userId: number;
@@ -29,11 +30,6 @@ interface Message {
 export default function JobSeekerMessagesPage() {
   const router = useRouter();
 
-  const searchParams =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : null;
-
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -46,32 +42,49 @@ export default function JobSeekerMessagesPage() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const currentUserId = Number(localStorage.getItem("hiremate_userId"));
-  const recruiterId = Number(searchParams?.get("recruiterId"));
-  const recruiterUsername = searchParams?.get("recruiterUsername");
+  const currentUserId =
+    typeof window !== "undefined"
+      ? Number(localStorage.getItem("hiremate_userId"))
+      : 0;
+
+  // ✅ Removed search params completely to fix Vercel build issue
+  const recruiterId = null;
+  const recruiterUsername = null;
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const fetchMessages = (peerId: number, reset = false) => {
+  const fetchMessages = (
+    peerId: number,
+    reset = false
+  ) => {
     fetch(
       `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
         reset ? 0 : page
       }&size=20`,
       {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }
     )
       .then((r) => r.json())
       .then((msgs: Message[]) => {
-        if (msgs.length === 0) setHasMore(false);
+        if (msgs.length === 0) {
+          setHasMore(false);
+        }
+
         setMessages((prev) =>
-          reset ? msgs.reverse() : [...msgs.reverse(), ...prev]
+          reset
+            ? msgs.reverse()
+            : [...msgs.reverse(), ...prev]
         );
       })
       .catch((err) =>
@@ -88,19 +101,24 @@ export default function JobSeekerMessagesPage() {
     setPage(0);
     setMessages([]);
     setHasMore(true);
+
     fetchMessages(conv.userId, true);
   };
 
   const loadOlder = () => {
     if (!selected || !hasMore) return;
+
     setPage((p) => p + 1);
+
     fetchMessages(selected.userId);
   };
 
   const sendMessage = () => {
     if (!selected || !newMsg.trim()) return;
 
-    const payload = { text: newMsg };
+    const payload = {
+      text: newMsg,
+    };
 
     fetch(
       `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
@@ -114,7 +132,10 @@ export default function JobSeekerMessagesPage() {
       }
     )
       .then((r) => {
-        if (!r.ok) throw new Error("Send failed");
+        if (!r.ok) {
+          throw new Error("Send failed");
+        }
+
         return r.json();
       })
       .then((msg: Message) => {
@@ -132,7 +153,9 @@ export default function JobSeekerMessagesPage() {
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/messages/conversations`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
     })
       .then((r) => r.json())
       .then((data: Conversation[]) => {
@@ -140,7 +163,9 @@ export default function JobSeekerMessagesPage() {
         setFiltered(data);
 
         if (recruiterId && recruiterUsername) {
-          const existing = data.find((c) => c.userId === recruiterId);
+          const existing = data.find(
+            (c) => c.userId === recruiterId
+          );
 
           if (existing) {
             openChat(existing);
@@ -155,6 +180,7 @@ export default function JobSeekerMessagesPage() {
             setSelected(placeholder);
             setMessages([]);
             setHasMore(true);
+
             fetchMessages(recruiterId, true);
           }
         }
@@ -169,7 +195,9 @@ export default function JobSeekerMessagesPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!search) return setFiltered(conversations);
+    if (!search) {
+      return setFiltered(conversations);
+    }
 
     const q = search.toLowerCase();
 
@@ -186,7 +214,10 @@ export default function JobSeekerMessagesPage() {
     <div className="min-h-screen p-8 max-w-7xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
         <BackButton />
-        <h1 className="text-3xl font-bold">Messages</h1>
+
+        <h1 className="text-3xl font-bold">
+          Messages
+        </h1>
       </div>
 
       <div className="flex h-[80vh] border rounded overflow-hidden">
@@ -194,7 +225,9 @@ export default function JobSeekerMessagesPage() {
           <Input
             placeholder="Search by name or ID..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
             className="mb-4"
           />
 
@@ -209,14 +242,18 @@ export default function JobSeekerMessagesPage() {
                     : "hover:bg-muted"
                 }`}
               >
-                <div className="font-medium">@{conv.username}</div>
+                <div className="font-medium">
+                  @{conv.username}
+                </div>
 
                 <div className="text-xs text-muted-foreground line-clamp-1">
                   {conv.lastMessage}
                 </div>
 
                 <div className="text-2xs text-muted-foreground mt-1">
-                  {new Date(conv.updatedAt).toLocaleString()}
+                  {new Date(
+                    conv.updatedAt
+                  ).toLocaleString()}
                 </div>
               </button>
             ))}
@@ -241,7 +278,9 @@ export default function JobSeekerMessagesPage() {
                   Chat with @{selected.username}
                 </h2>
 
-                <button onClick={() => setSelected(null)}>
+                <button
+                  onClick={() => setSelected(null)}
+                >
                   <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
                 </button>
               </div>
@@ -271,7 +310,9 @@ export default function JobSeekerMessagesPage() {
                     {m.text}
 
                     <div className="text-2xs text-muted-foreground text-right mt-1">
-                      {new Date(m.sentAt).toLocaleTimeString()}
+                      {new Date(
+                        m.sentAt
+                      ).toLocaleTimeString()}
                     </div>
                   </div>
                 ))}
@@ -283,9 +324,12 @@ export default function JobSeekerMessagesPage() {
                 <Input
                   placeholder="Type a message…"
                   value={newMsg}
-                  onChange={(e) => setNewMsg(e.target.value)}
+                  onChange={(e) =>
+                    setNewMsg(e.target.value)
+                  }
                   onKeyDown={(e) =>
-                    e.key === "Enter" && sendMessage()
+                    e.key === "Enter" &&
+                    sendMessage()
                   }
                   className="flex-1"
                 />
