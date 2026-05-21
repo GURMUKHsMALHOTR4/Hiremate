@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,15 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // ✅ Allow Swagger + Auth APIs without JWT
         String path = request.getServletPath();
 
-        if (
-                path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/api/auth")
-        ) {
-
+        // ✅ Allow public resume access
+        if (path.startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,57 +44,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        // ✅ Extract JWT token
-        if (
-                authHeader != null &&
-                authHeader.startsWith("Bearer ")
-        ) {
+        if (authHeader != null &&
+                authHeader.startsWith("Bearer ")) {
 
             jwtToken = authHeader.substring(7);
 
             try {
-                username = jwtUtil.extractUsername(jwtToken);
+                username =
+                        jwtUtil.extractUsername(jwtToken);
 
             } catch (Exception e) {
-
                 logger.warn(
-                        "JWT extraction failed: " + e.getMessage()
+                        "JWT extraction failed: "
+                                + e.getMessage()
                 );
             }
         }
 
-        // ✅ Validate token
-        if (
-                username != null &&
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication() == null
-        ) {
+        if (username != null &&
+                SecurityContextHolder.getContext()
+                        .getAuthentication() == null) {
 
             UserDetails userDetails =
                     customUserDetailsService
                             .loadUserByUsername(username);
 
-            if (
-                    jwtToken != null &&
-                    jwtUtil.validateToken(jwtToken)
-            ) {
+            if (jwtToken != null &&
+                    jwtUtil.validateToken(jwtToken)) {
 
-                UsernamePasswordAuthenticationToken authenticationToken =
+                UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities()
                         );
 
-                authenticationToken.setDetails(
+                authToken.setDetails(
                         new WebAuthenticationDetailsSource()
                                 .buildDetails(request)
                 );
 
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authenticationToken);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authToken);
             }
         }
 
