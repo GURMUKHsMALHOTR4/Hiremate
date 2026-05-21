@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { MessageSquare, Send, X } from "lucide-react";
 import BackButton from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ interface Message {
 
 export default function RecruiterMessagesPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Send, X } from "lucide-react";
+
 import BackButton from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import { getToken } from "@/lib/auth-service";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,7 +29,9 @@ interface Message {
   sentAt: string;
 }
 
-export default function JobSeekerMessagesPage() {
+export default function RecruiterMessagesPage() {
+  const router = useRouter();
+
   const { toast } = useToast();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,9 +39,12 @@ export default function JobSeekerMessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState<Conversation[]>([]);
-  const [selected, setSelected] = useState<Conversation | null>(null);
+  const [selected, setSelected] =
+    useState<Conversation | null>(null);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
+
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
@@ -92,6 +100,7 @@ export default function JobSeekerMessagesPage() {
 
   const openChat = (conv: Conversation) => {
     setSelected(conv);
+
     setPage(0);
     setMessages([]);
     setHasMore(true);
@@ -134,6 +143,7 @@ export default function JobSeekerMessagesPage() {
       })
       .then((msg: Message) => {
         setMessages((prev) => [...prev, msg]);
+
         setNewMsg("");
       })
       .catch((err) =>
@@ -154,6 +164,7 @@ export default function JobSeekerMessagesPage() {
       .then((r) => r.json())
       .then((data: Conversation[]) => {
         setConversations(data);
+
         setFiltered(data);
       })
       .catch((err) =>
@@ -228,6 +239,12 @@ export default function JobSeekerMessagesPage() {
                 </div>
               </button>
             ))}
+
+            {filtered.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-4">
+                No conversations found.
+              </p>
+            )}
           </div>
         </div>
 
