@@ -55,40 +55,39 @@ export default function JobSeekerMessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  const fetchMessages = async (
+  const fetchMessages = (
     peerId: number,
     reset = false
   ) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
-          reset ? 0 : page
-        }&size=20`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-
-      const msgs: Message[] = await response.json();
-
-      if (msgs.length === 0) {
-        setHasMore(false);
+    fetch(
+      `${API_BASE_URL}/api/messages/conversations/${peerId}/messages/paginated?page=${
+        reset ? 0 : page
+      }&size=20`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       }
+    )
+      .then((r) => r.json())
+      .then((msgs: Message[]) => {
+        if (msgs.length === 0) {
+          setHasMore(false);
+        }
 
-      setMessages((prev) =>
-        reset
-          ? msgs.reverse()
-          : [...msgs.reverse(), ...prev]
+        setMessages((prev) =>
+          reset
+            ? msgs.reverse()
+            : [...msgs.reverse(), ...prev]
+        );
+      })
+      .catch((err) =>
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
       );
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
-    }
   };
 
   const openChat = (conv: Conversation) => {
@@ -108,75 +107,67 @@ export default function JobSeekerMessagesPage() {
     fetchMessages(selected.userId);
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!selected || !newMsg.trim()) return;
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-          },
-          body: JSON.stringify({
-            text: newMsg,
-          }),
-        }
-      );
+    const payload = {
+      text: newMsg,
+    };
 
-      if (!response.ok) {
-        throw new Error("Send failed");
+    fetch(
+      `${API_BASE_URL}/api/messages/conversations/${selected.userId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(payload),
       }
+    )
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error("Send failed");
+        }
 
-      const msg: Message = await response.json();
-
-      setMessages((prev) => [...prev, msg]);
-
-      setNewMsg("");
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    const loadConversations = async () => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/messages/conversations`,
-          {
-            headers: {
-              Authorization: `Bearer ${getToken()}`,
-            },
-          }
-        );
-
-        const data: Conversation[] =
-          await response.json();
-
-        setConversations(data);
-        setFiltered(data);
-      } catch (err: any) {
+        return r.json();
+      })
+      .then((msg: Message) => {
+        setMessages((prev) => [...prev, msg]);
+        setNewMsg("");
+      })
+      .catch((err) =>
         toast({
           title: "Error",
           description: err.message,
           variant: "destructive",
-        });
-      }
-    };
+        })
+      );
+  };
 
-    loadConversations();
-  }, []);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/messages/conversations`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    })
+      .then((r) => r.json())
+      .then((data: Conversation[]) => {
+        setConversations(data);
+        setFiltered(data);
+      })
+      .catch((err) =>
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
+      );
+  }, [toast]);
 
   useEffect(() => {
     if (!search) {
-      setFiltered(conversations);
-      return;
+      return setFiltered(conversations);
     }
 
     const q = search.toLowerCase();
@@ -237,12 +228,6 @@ export default function JobSeekerMessagesPage() {
                 </div>
               </button>
             ))}
-
-            {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground mt-4">
-                No conversations found.
-              </p>
-            )}
           </div>
         </div>
 
@@ -302,16 +287,15 @@ export default function JobSeekerMessagesPage() {
 
               <div className="border-t p-4 flex gap-2">
                 <Input
-                  placeholder="Type a message..."
+                  placeholder="Type a message…"
                   value={newMsg}
                   onChange={(e) =>
                     setNewMsg(e.target.value)
                   }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      sendMessage();
-                    }
-                  }}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    sendMessage()
+                  }
                   className="flex-1"
                 />
 
