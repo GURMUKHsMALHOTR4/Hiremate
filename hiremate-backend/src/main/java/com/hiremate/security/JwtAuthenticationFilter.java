@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,38 +25,82 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private CustomUserDetailsService customUserDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        // ✅ Allow Swagger + Auth APIs without JWT
+        String path = request.getServletPath();
+
+        if (
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/api/auth")
+        ) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final String authHeader =
+                request.getHeader("Authorization");
+
         String username = null;
         String jwtToken = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        // ✅ Extract JWT token
+        if (
+                authHeader != null &&
+                authHeader.startsWith("Bearer ")
+        ) {
+
             jwtToken = authHeader.substring(7);
+
             try {
                 username = jwtUtil.extractUsername(jwtToken);
+
             } catch (Exception e) {
-                logger.warn("JWT extraction failed: " + e.getMessage());
+
+                logger.warn(
+                        "JWT extraction failed: " + e.getMessage()
+                );
             }
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        // ✅ Validate token
+        if (
+                username != null &&
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication() == null
+        ) {
 
-            if (jwtToken != null && jwtUtil.validateToken(jwtToken)) {
+            UserDetails userDetails =
+                    customUserDetailsService
+                            .loadUserByUsername(username);
+
+            if (
+                    jwtToken != null &&
+                    jwtUtil.validateToken(jwtToken)
+            ) {
+
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
                         );
 
                 authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authenticationToken);
             }
         }
 
