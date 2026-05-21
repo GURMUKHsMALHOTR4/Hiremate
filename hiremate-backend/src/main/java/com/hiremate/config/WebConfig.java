@@ -1,14 +1,11 @@
 package com.hiremate.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // ✅ Enable CORS
     @Override
     public void addCorsMappings(CorsRegistry registry) {
 
@@ -19,15 +16,26 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(false);
     }
 
-    // ✅ Serve uploaded resumes/files publicly
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
+        String uploadPath =
+                System.getenv("UPLOAD_DIR");
+
+        if (uploadPath == null || uploadPath.isEmpty()) {
+
+            uploadPath =
+                    System.getProperty("user.dir")
+                    + "/uploads/";
+        }
+
+        if (!uploadPath.endsWith("/")) {
+            uploadPath += "/";
+        }
+
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(
-                        "file:uploads/",
-                        "file:./uploads/",
-                        "file:/opt/render/project/src/uploads/"
+                        "file:" + uploadPath
                 );
     }
 }
