@@ -62,7 +62,9 @@ export default function RecruiterDashboard() {
     useState(false);
 
   const getInitial = (name: string | null) => {
-    return name ? name.charAt(0).toUpperCase() : "?";
+    return name
+      ? name.charAt(0).toUpperCase()
+      : "?";
   };
 
   useEffect(() => {
@@ -97,27 +99,38 @@ export default function RecruiterDashboard() {
 
     setIsLoading(true);
 
-    fetch(`${API_BASE_URL}/api/jobs/employer/${userId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
+    fetch(
+      `${API_BASE_URL}/api/jobs/employer/${userId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    )
       .then((r) => {
-        if (!r.ok)
-          throw new Error("Fetch failed: " + r.status);
+
+        if (!r.ok) {
+          throw new Error(
+            "Fetch failed: " + r.status
+          );
+        }
 
         return r.json();
       })
       .then((data) => {
+
         setJobs(data);
+
       })
       .catch((err) =>
+
         toast({
           title: "Error",
           description: err.message,
           variant: "destructive",
         })
+
       )
       .finally(() => setIsLoading(false));
 
@@ -135,7 +148,8 @@ export default function RecruiterDashboard() {
           `${API_BASE_URL}/api/jobs/employer/${userId}`,
           {
             headers: {
-              Authorization: `Bearer ${getToken()}`,
+              Authorization:
+                `Bearer ${getToken()}`,
             },
           }
         );
@@ -150,7 +164,8 @@ export default function RecruiterDashboard() {
             `${API_BASE_URL}/api/applications/byJob/${job.id}`,
             {
               headers: {
-                Authorization: `Bearer ${getToken()}`,
+                Authorization:
+                  `Bearer ${getToken()}`,
               },
             }
           );
@@ -158,6 +173,7 @@ export default function RecruiterDashboard() {
           const apps = await appRes.json();
 
           if (apps.length > 0) {
+
             activeJobIds.push(job.id);
           }
         }
@@ -182,7 +198,9 @@ export default function RecruiterDashboard() {
 
   }, [userId]);
 
-  const fetchApplicants = async (jobId: number) => {
+  const fetchApplicants = async (
+    jobId: number
+  ) => {
 
     try {
 
@@ -190,13 +208,18 @@ export default function RecruiterDashboard() {
         `${API_BASE_URL}/api/applications/byJob/${jobId}`,
         {
           headers: {
-            Authorization: `Bearer ${getToken()}`,
+            Authorization:
+              `Bearer ${getToken()}`,
           },
         }
       );
 
-      if (!res.ok)
-        throw new Error("Failed to fetch applicants");
+      if (!res.ok) {
+
+        throw new Error(
+          "Failed to fetch applicants"
+        );
+      }
 
       const data = await res.json();
 
@@ -209,7 +232,8 @@ export default function RecruiterDashboard() {
       toast({
         title: "Error",
         description:
-          err.message || "Failed to load applicants",
+          err.message ||
+          "Failed to load applicants",
         variant: "destructive",
       });
     }
@@ -225,7 +249,8 @@ export default function RecruiterDashboard() {
         `${API_BASE_URL}/api/jobs/employer/${userId}`,
         {
           headers: {
-            Authorization: `Bearer ${getToken()}`,
+            Authorization:
+              `Bearer ${getToken()}`,
           },
         }
       );
@@ -240,14 +265,16 @@ export default function RecruiterDashboard() {
           `${API_BASE_URL}/api/applications/byJob/${job.id}`,
           {
             headers: {
-              Authorization: `Bearer ${getToken()}`,
+              Authorization:
+                `Bearer ${getToken()}`,
             },
           }
         );
 
         if (!appRes.ok) continue;
 
-        const applicants = await appRes.json();
+        const applicants =
+          await appRes.json();
 
         applicants.forEach((a: any) => {
 
@@ -273,7 +300,9 @@ export default function RecruiterDashboard() {
     }
   };
 
-  const handleOpenDialog = (jobId: number) => {
+  const handleOpenDialog = (
+    jobId: number
+  ) => {
 
     setOpenJobId(jobId);
 
@@ -313,17 +342,22 @@ export default function RecruiterDashboard() {
       const res = await fetch(endpoint, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
+          "Content-Type":
+            "application/json",
+          Authorization:
+            `Bearer ${getToken()}`,
         },
       });
 
-      if (!res.ok)
+      if (!res.ok) {
+
         throw new Error("Delete failed");
+      }
 
       toast({
         title: "Deleted",
-        description: `Job #${jobId} removed`,
+        description:
+          `Job #${jobId} removed`,
       });
 
       setJobs((js) =>
@@ -353,13 +387,16 @@ export default function RecruiterDashboard() {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${getToken()}`,
+            Authorization:
+              `Bearer ${getToken()}`,
           },
         }
       );
 
-      if (!res.ok)
+      if (!res.ok) {
+
         throw new Error("Update failed");
+      }
 
       toast({
         title:
@@ -414,15 +451,20 @@ export default function RecruiterDashboard() {
                 : "outline"
             }
             onClick={() => {
+
               setShowNotifications(true);
+
               fetchNotifications();
+
               setHasNewNotifications(false);
+
             }}
           >
             🔔 Notifications
           </Button>
 
           <Link href="/recruiter-dashboard/messages">
+
             <Button
               variant={
                 hasNewMessages
@@ -433,6 +475,7 @@ export default function RecruiterDashboard() {
             >
               <MessageSquare className="w-5 h-5" />
             </Button>
+
           </Link>
 
         </div>
@@ -463,7 +506,9 @@ export default function RecruiterDashboard() {
                 </CardTitle>
 
                 <CardDescription>
-                  {job.company} — 📍 {job.location}
+                  {job.company}
+                  {" — 📍 "}
+                  {job.location}
                 </CardDescription>
 
               </CardHeader>
@@ -496,7 +541,9 @@ export default function RecruiterDashboard() {
                 <Dialog
                   open={openJobId === job.id}
                   onOpenChange={(o) =>
-                    setOpenJobId(o ? job.id : null)
+                    setOpenJobId(
+                      o ? job.id : null
+                    )
                   }
                 >
 
@@ -506,7 +553,9 @@ export default function RecruiterDashboard() {
 
                       <DialogTitle>
                         Applicants for{" "}
-                        <strong>{job.title}</strong>
+                        <strong>
+                          {job.title}
+                        </strong>
                       </DialogTitle>
 
                       <button
@@ -533,7 +582,9 @@ export default function RecruiterDashboard() {
                             <div className="flex justify-between items-center">
 
                               <span>
-                                @{a.username} ({a.email})
+                                @{a.username}
+                                {" "}
+                                ({a.email})
                               </span>
 
                               {a.resumeFilename && (
@@ -548,6 +599,7 @@ export default function RecruiterDashboard() {
                                       url,
                                       "_blank"
                                     );
+
                                   }}
                                   className="hover:text-primary"
                                 >
@@ -620,7 +672,7 @@ export default function RecruiterDashboard() {
                                           "Missing Info",
 
                                         description:
-                                          "User ID or Username missing.",
+                                          `userId=${a.userId}, username=${a.username}`,
 
                                         variant:
                                           "destructive",
@@ -629,9 +681,49 @@ export default function RecruiterDashboard() {
                                       return;
                                     }
 
+                                    // ✅ Save chat user
+                                    const existingChats =
+                                      JSON.parse(
+                                        localStorage.getItem(
+                                          "hiremate_chats"
+                                        ) || "[]"
+                                      );
+
+                                    const alreadyExists =
+                                      existingChats.some(
+                                        (chat: any) =>
+                                          String(
+                                            chat.userId
+                                          ) ===
+                                          String(
+                                            a.userId
+                                          )
+                                      );
+
+                                    if (
+                                      !alreadyExists
+                                    ) {
+
+                                      existingChats.push({
+                                        userId:
+                                          a.userId,
+
+                                        username:
+                                          a.username,
+                                      });
+
+                                      localStorage.setItem(
+                                        "hiremate_chats",
+                                        JSON.stringify(
+                                          existingChats
+                                        )
+                                      );
+                                    }
+
                                     router.push(
                                       `/recruiter-dashboard/messages?senderId=${userId}&senderUsername=${encodeURIComponent(username)}&receiverId=${a.userId}&receiverUsername=${encodeURIComponent(a.username)}`
                                     );
+
                                   }}
                                 >
                                   💬 Message
