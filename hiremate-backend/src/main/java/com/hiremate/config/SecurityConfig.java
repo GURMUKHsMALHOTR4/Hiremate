@@ -63,17 +63,26 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/jobs/create")
                 .permitAll()
 
-                // ✅ APPLICATION SUBMIT
+                // ✅ APPLY JOB
                 .requestMatchers(HttpMethod.POST, "/api/applications/apply")
                 .authenticated()
 
-                // ✅ EVERYTHING ELSE SECURED
+                // ✅ WITHDRAW APPLICATION
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/api/applications/*/cancel"
+                )
+                .authenticated()
+
+                // ✅ EVERYTHING ELSE
                 .anyRequest()
                 .authenticated()
             )
 
             .sessionManagement(session ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    session.sessionCreationPolicy(
+                            SessionCreationPolicy.STATELESS
+                    )
             )
 
             .authenticationProvider(authenticationProvider())
@@ -106,17 +115,23 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOriginPatterns(
+                List.of("*")
+        );
 
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
+        config.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS"
+                )
+        );
 
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(
+                List.of("*")
+        );
 
         config.setAllowCredentials(false);
 
@@ -132,9 +147,13 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
 
         CustomAuthenticationProvider provider =
-                new CustomAuthenticationProvider(userDetailsService);
+                new CustomAuthenticationProvider(
+                        userDetailsService
+                );
 
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(
+                passwordEncoder()
+        );
 
         return provider;
     }
